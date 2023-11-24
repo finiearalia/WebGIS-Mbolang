@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGIS Mbolang</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <style>
+        #map {
+            height: 97.5vh;
+        }
+
+        *.info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: #F3EEEF;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .info h2 {
+            margin: 0 0 5px;
+            color: #F2EFEA;
+        }
+
+        .navbar {
+            background-color: #F2EFEA;
+            /* untuk mengganti latar belakang  */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* untuk menambahi efek bayang- bayang*/
+            transition: background-color 0.3s;
+            /* animasi  warna latar belakang */
+        }
+
+        .navbar a {
+            color: #CA955C;
+            /* untuk warna teks */
+            transition: color 0.3s;
+            /* animasi perubahan warna teks */
+        }
+
+        .navbar-brand img {
+            margin-right: 5px;
+        }
+
+        .navbar a:hover {
+            color: black;
+            /* warna teks saat dihover */
+        }
+
+        .navbar.sticky-top {
+            /* sticky navbar untuk scroll */
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            /* untuk menentukan urutan tumpukan elemen */
+        }
+
+        .navbar-scrolled {
+            /* navbar saat di scroll */
+            background-color: black;
+            /* mengganti  warna latar belakang yang diinginkan saat di-scroll */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* efek bayangan navbar saat discrol*/
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .text-over-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #FAF8F1;
+            /*tempat mengganti warna text*/
+            font-size: 50px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif, ;
+            /*untuk mengganti font*/
+        }
+
+
+        .text-card {
+            text-align: center;
+            color: white;
+            /*tempat mengganti warna text*/
+            font-size: 16px;
+            font-family: 'segoe-ui'
+                /*untuk mengganti font*/
+
+        }
+
+        .text-paragraf {
+            text-align: center;
+            color: black;
+            /*tempat mengganti warna text*/
+            font-size: 16px;
+            font-family: 'Garamond'
+                /*untuk mengganti font*/
+
+        }
+
+        .text-judul {
+            text-align: center;
+            color: black;
+            /*tempat mengganti warna text*/
+            font-size: 16px;
+            font-family: 'Georgia'
+                /*untuk mengganti font*/
+
+        }
+
+        .card-style {
+            border-style: solid;
+            border-color: #F2EFEA;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-right: 20px;
+            border-width: 5px;
+        }
+
+
+        .bg-brown {
+            background-color: #C7B198;
+            border-radius: 35px;
+        }
+
+        .bg-brown2 {
+            background-color: #F0ECE2;
+        }
+
+
+
+        /*** Courses ***/
+        .courses {
+            min-height: 100vh;
+            background: linear-gradient(rgba(255, 255, 255, .9), rgba(255, 255, 255, .9)), url(../img/carousel-1.jpg) center center no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .courses-item .courses-overlay {
+            position: absolute;
+            width: 100%;
+            height: 0;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .5);
+            overflow: hidden;
+            opacity: 0;
+            transition: .5s;
+        }
+
+        .courses-item:hover .courses-overlay {
+            height: 100%;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!---Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top text-align-center">
+        <div class="container-fluid">
+            <a aria-current="page" href="/" class="router-link-active router-link-exact-active navbar-brand"><img
+                    src="assets/img/logo/logo.png" class="brand-logo"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#hero"><i class="fa-solid fa-circle-info"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#b"><i class="fa-solid fa-circle-info"></i>About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="wfsgeoserver1.html"><i class="fa-solid fa-circle-info"></i>Maps</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#a"><i class="fa-solid fa-circle-info"></i>Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!--carousel-->
+    <section id="hero">
+        <div class="video-container">
+            <video playsinline muted loop autoplay src="assets/img/video/dieng.mp4" type="video/mp4"
+                alt="video"></video>
+            <div class="text-over-video">
+                <b>LET'S STROLL AROUND <br> FIND GOOD PLACE!</b></b>
+                <div button-peta="" class="d-flex justify-content-center mt-2"><a button-peta=""
+                        href="wfsgeoserver1.html" class="btn py-2 px-3" style="background: #C7B198 !important;">
+                        Explore Destination </a></div>
+            </div>
+        </div>
+    </section>
+
+    <br b>
+    <br b>
+    <br b>
+
+    <!-- about -->
+    <section id="b">
+        <div class="container bg-brown">
+            <div class="row text-center mb-3 bg-brown text-light">
+                <div class="col text-card fst-italic animate__animated animate__bounce animate__delay-10s 10s">
+                    <br>
+                    <h2 style="text-shadow: 0 0 5px white"> ☾ ⋆*･ﾟ Tentang Mbolang ⋆*･ﾟ</h2>
+                </div>
+            </div>
+            <div class="row justify-content-center fs-7 bg-brown2 text-center">
+                <div class="col-md-8 lh-base">
+                    <p class="font-monospace">Mbolang merupakan webGIS yang memberikan informasi terkait lokasi
+                        pariwisata dan rekomendasi penginapan yang terdapat di Kabupaten Wonosobo. Mbolang menyajikan informasi secara sederhana dan interaktif sehingga
+                        memudahkan anda untuk mengeksplorasi wisata yang akan anda kunjungi. Anda juga dapat menambahkan
+                        destinasi wisata lainnya yang terdapat di Kabupaten Wonosobo ke dalam database kami.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <br>
+    <br>
+    <br>
+
+    <!--card-->
+    <section id="sleman" style="background-color: #C7B198; border-radius: 6%;">
+        <div class="row text-center text-card">
+            <div class="col ">
+                <br>
+                <h1 style="text-shadow: 0 0 3px white;">★・・・Destinasi Wisata Terfavorit・・・★</h1>
+            </div>
+        </div>
+        <br>
+        <br>
+
+        <div class="row" style="background-color: #C7B198;">
+            <div class="col-4">
+                <div class="card card-style"
+                    style="border-top-left-radius: 20px; border-top-right-radius: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin-left: 20px;">
+                    <img src="assets/img/project/kebunteh.jpeg"
+                        style="width: 100%; height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <kebun class="text-judul">
+                        <h2>Kebun Teh Tambi</h2>
+                        <p class="text-paragraf">Kebun Teh Tambi merupakan wisata alam yang terletak di Kecamatan
+                            Kejajar. Selain udaranya
+                            yang sejuk, wisata ini juga menyajikan pemandangan yang asri dari kebun teh yang dapat
+                            mencuci mata para wisatawan. Bagaimana tertarik mengunjungi?</p>
+                </div>
+            </div>
+            <div class="col-4 mx mx-auto">
+                <div class="card card-style">
+                    <img src="assets/img/project/telagawarna.jpg"
+                        style="width: 100%; height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <telaga class="text-judul">
+                        <h2>Telaga Warna Dieng</h2>
+                        <p class="text-paragraf">Telaga Warna adalah salah satu objek wisata yang berada di kawasan
+                            Dataran Tinggi Dieng.
+                            Dijuluki telaga warna karena keunikan fenomena alam yang terjadi di tempat ini, yaitu warna
+                            air dari telaga tersebut yang sering berubah-ubah.
+                            Bagaimana anda tertarik mengunjungi?
+                        </p>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card card-style">
+                    <img src="assets/img/project/batupandang.jpg"
+                        style="width: 100%; height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <batu class="text-judul">
+                        <h3>Batu Pandang Ratapan Angin</h3>
+                        <p class="text-paragraf">Batu ratapan angin merupakan dua buah batu besar yang berdampingan dan
+                            terletak diatas bukit
+                            sekitar Dieng Plateau Theatre lokasi ini menjadi lokasi strategis untuk menikmati keindahan
+                            telaga warna pengilon dengan background hamparan lukisan alam yang sempurna.
+                            Bagaimana tertarik mengunjungi?
+                        </p>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section>
+    <br>
+    <br>
+
+    <!-- Courses Start -->
+    <div class="container-xxl courses my-6 py-6 pb-0">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px; color: white;">
+                <h1 class="display-6 mb-4 bg-brown" style="text-shadow: 0 0 3px white">Hotel Recomendations</h1>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-12">
+                    <div class="courses-item d-flex flex-column bg-brown2 overflow-hidden h-100"
+                        style=" border-radius: 35px;">
+                        <div class="text-center p-4 pt-0">
+                            <div class="d-inline-block bg-brown text-black fs-5 py-1 px-4 mb-4">★★★★★</div>
+                            <h5 class="mb-3">Villa Sindoro Village</h5>
+                            <p>Terletak di Desa, Wonojoyo, Bumireso, Kec. Wonosobo, Kabupaten Wonosobo, Jawa Tengah</p>
+                        </div>
+                        <div class="position-relative mt-auto">
+                            <img class="img-fluid" src="assets/img/project/villa.png" alt="">
+                            <div class="courses-overlay">
+                                <a class="btn  border-2" style="background-color: #F2EFEA;"
+                                    href="https://www.traveloka.com/id-id/hotel/indonesia/villa-sindoro-village-9000001136208">Read
+                                    More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="courses-item d-flex flex-column bg-brown2 overflow-hidden h-100"
+                        style=" border-radius: 35px;">
+                        <div class="text-center p-4 pt-0">
+                            <div class="d-inline-block bg-brown text-black fs-5 py-1 px-4 mb-4">★★★★</div>
+                            <h5 class="mb-3">Hotel Dafam Wonosobo</h5>
+                            <p>Terletak di Jalan Dieng No. 38 Rowopeni, Kalianget, Pusat Kota Wonosobo, Wonosobo</p>
+                        </div>
+                        <div class="position-relative mt-auto">
+                            <img class="img-fluid" src="assets/img/project/hotel1.png" alt="">
+                            <div class="courses-overlay">
+                                <a class="btn  border-2" style="background-color: #F2EFEA;"
+                                    href="https://www.traveloka.com/id-id/hotel/indonesia/hotel-dafam-wonosobo-9000000135170">Read
+                                    More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div gallery="" class="wrap-gallery py-5" id="gallery"
+        style="background-color: white; overflow-x: auto; width: 100%;"><br c="">
+        <div data-v-df357e51="" class="gallery d-flex flex-column" style="max-height: 600px; flex-wrap: wrap;">
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/kebunteh.jpeg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/Dieng.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/lubangsewu.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/telagawarna.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/wadukwadas.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/dieng2.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/tugucarica.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/sikarim.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51="" src="assets/img/project/wsb.jpeg"
+                        alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/wonoland.png" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/alunalun.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/kahyangan.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/winong.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/kebunteh.jpeg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/Dieng.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51="" src="assets/img/project/wsbb.jpg"
+                        alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/telagawarna.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/wadukwadas.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/dieng2.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/tugucarica.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/sikarim.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51="" src="assets/img/project/wsb.jpeg"
+                        alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/wonoland.png" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/alunalun.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/kahyangan.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+            <div data-v-df357e51="" class="wrap-gambar p-2 m-2"
+                style="border-radius: 10px; box-shadow: lightgray 0px 0px 5px; width: 200px;"><a data-v-df357e51=""
+                    data-fancybox="gallery" fancybox="gallery"><img data-v-df357e51=""
+                        src="assets/img/project/winong.jpg" alt="" style="width: 100%; border-radius: 10px;"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer id="a" class="bg-brown2 text-center text-lg-start">
+        <div class="container p-4">
+            <div class="row">
+                <div class="col-lg-4 col-md-12 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Contact Us</h5>
+                    <p>
+                        WhatsApp
+                        <strong>+62 88200731616</strong>
+                        <br>
+                        Email :
+                        <strong> finiearaliashearani@mail.ugm.ac.id</strong>
+                    </p>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4 mb-md-6">
+                    <h6 class="text-bg-start">Tempat wisata favoritmu belum tersedia?</h6>
+                    <ul class=" list-unstyled mb-0">
+                        <li>
+                            <a href="form.html" class="text-center">Rekomendasikan tempat wisata disini
+                                yuk!</a>
+                        </li>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4 mb-md-4">
+                    <h6 class="text-bg-start">Let's Connect!</h6>
+                    <ul>
+                        <li>
+                            <a href="https://instagram.com/finiearalia_?igshid=OGQ5ZDc2ODk2ZA=="
+                                class="text-center">Instagram</a>
+                        </li>
+                        <li>
+                            <a href="https://www.linkedin.com/in/finie-a-a1815b281?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                                class="text-center fab fa-linkedin-in">LinkedIn</a>
+                        </li>
+                </div>
+                <div class="text-center p-2" style="background-color: #876445; color: #F2EFEA;">
+                    ©MBOLANG2023
+                </div>
+    </footer>
+
+</body>
+
+</html>
